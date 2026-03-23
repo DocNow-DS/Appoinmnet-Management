@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: appointment-management
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/appointment_management}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
