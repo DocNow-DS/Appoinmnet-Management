@@ -30,7 +30,7 @@ public class AppointmentSeedController {
         appointment.setDoctorId("sample-doctor-id");
         appointment.setStartTime(now.plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0));
         appointment.setEndTime(now.plusDays(1).withHour(10).withMinute(30).withSecond(0).withNano(0));
-        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setConsultationType("OFFLINE");
         appointment.setNotes("Seed appointment for Mongo collection creation");
         appointment.setCreatedAt(now);
