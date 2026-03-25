@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import com.healthcare.appointment.appointment.dto.AppointmentResponse;
 import com.healthcare.appointment.appointment.dto.CreateAppointmentRequest;
 import com.healthcare.appointment.appointment.dto.DoctorActionRequest;
-import com.healthcare.appointment.appointment.dto.DoctorActionRequest.DoctorAppointmentAction;
 import com.healthcare.appointment.appointment.dto.PatientRescheduleRequest;
 import com.healthcare.appointment.appointment.model.Appointment;
 import com.healthcare.appointment.appointment.model.AppointmentStatus;
 import com.healthcare.appointment.appointment.repository.AppointmentRepository;
 import com.healthcare.appointment.doctor.client.DoctorApiClient;
 import com.healthcare.appointment.doctor.client.DoctorProfileResponse;
+import com.healthcare.appointment.notification.client.NotificationServiceClient;
 import com.healthcare.appointment.shared.exception.BadRequestException;
 import com.healthcare.appointment.shared.exception.ConflictException;
 import com.healthcare.appointment.shared.exception.ForbiddenException;
@@ -32,16 +32,19 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final DoctorApiClient doctorApiClient;
     private final AppointmentAvailabilityValidator availabilityValidator;
+    private final NotificationServiceClient notificationServiceClient;
     private final int defaultDurationMinutes;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             DoctorApiClient doctorApiClient,
             AppointmentAvailabilityValidator availabilityValidator,
+            NotificationServiceClient notificationServiceClient,
             @Value("${appointment.default-duration-minutes:30}") int defaultDurationMinutes) {
         this.appointmentRepository = appointmentRepository;
         this.doctorApiClient = doctorApiClient;
         this.availabilityValidator = availabilityValidator;
+        this.notificationServiceClient = notificationServiceClient;
         this.defaultDurationMinutes = defaultDurationMinutes;
     }
 
@@ -176,6 +179,10 @@ public class AppointmentService {
         a.setDoctorMessage(null);
         a.setStatus(AppointmentStatus.ACCEPTED);
         a.setUpdatedAt(LocalDateTime.now());
+        
+        notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+            .block();
+            
         return AppointmentResponse.from(appointmentRepository.save(a));
     }
 
@@ -222,6 +229,9 @@ public class AppointmentService {
                 if (request.message() != null) {
                     a.setDoctorMessage(request.message());
                 }
+                
+                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+                    .block();
             }
             case DECLINE -> {
                 if (a.getStatus() != AppointmentStatus.PENDING
