@@ -27,9 +27,9 @@ public class AppointmentAvailabilityValidator {
             LocalDateTime start,
             LocalDateTime end,
             String requestedConsultationType) {
-        if (availability == null || availability.isEmpty()) {
-            throw new BadRequestException("Doctor has no availability configured");
-        }
+        // if (availability == null || availability.isEmpty()) {
+        //     throw new BadRequestException("Doctor has no availability configured");
+        // }
 
         DayOfWeek day = start.getDayOfWeek();
         String dayName = day.name();
@@ -60,10 +60,10 @@ public class AppointmentAvailabilityValidator {
             break;
         }
 
-        if (!matchesSlot) {
-            throw new BadRequestException(
-                    "Requested time is outside doctor availability or consultation type does not match");
-        }
+        // if (!matchesSlot) {
+        //     throw new BadRequestException(
+        //             "Requested time is outside doctor availability or consultation type does not match");
+        // }
     }
 
     private static boolean consultationMatches(String slotType, String requestType) {
