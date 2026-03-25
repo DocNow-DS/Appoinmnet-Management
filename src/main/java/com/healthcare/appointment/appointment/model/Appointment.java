@@ -20,6 +20,13 @@ public class Appointment {
     private AppointmentStatus status;
     private String consultationType;
     private String notes;
+
+    /** Doctor decline reason or note when requesting reschedule. */
+    private String doctorMessage;
+
+    private LocalDateTime proposedStartTime;
+    private LocalDateTime proposedEndTime;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -85,6 +92,30 @@ public class Appointment {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getDoctorMessage() {
+        return doctorMessage;
+    }
+
+    public void setDoctorMessage(String doctorMessage) {
+        this.doctorMessage = doctorMessage;
+    }
+
+    public LocalDateTime getProposedStartTime() {
+        return proposedStartTime;
+    }
+
+    public void setProposedStartTime(LocalDateTime proposedStartTime) {
+        this.proposedStartTime = proposedStartTime;
+    }
+
+    public LocalDateTime getProposedEndTime() {
+        return proposedEndTime;
+    }
+
+    public void setProposedEndTime(LocalDateTime proposedEndTime) {
+        this.proposedEndTime = proposedEndTime;
     }
 
     public LocalDateTime getCreatedAt() {
