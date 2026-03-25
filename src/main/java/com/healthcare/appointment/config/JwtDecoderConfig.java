@@ -17,6 +17,7 @@ public class JwtDecoderConfig {
     @Bean
     JwtDecoder jwtDecoder(
             @Value("${JWT_SECRET:}") String jwtSecret,
+            @Value("${jwt.secret:}") String legacyJwtSecret,
             @Value("${JWT_ALGORITHM:HmacSHA256}") String jwtAlgorithm,
             @Value("${JWT_JWK_SET_URI:}") String jwtJwkSetUri,
             @Value("${JWT_ISSUER_URI:}") String jwtIssuerUri) {
@@ -25,8 +26,10 @@ public class JwtDecoderConfig {
         // - Symmetric (HS256/HS512/...) via JWT_SECRET
         // - Asymmetric via JWK set URI (JWT_JWK_SET_URI)
         // - Asymmetric via issuer discovery (JWT_ISSUER_URI)
-        if (jwtSecret != null && !jwtSecret.isBlank()) {
-            var secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), jwtAlgorithm);
+        String effectiveJwtSecret = (jwtSecret != null && !jwtSecret.isBlank()) ? jwtSecret : legacyJwtSecret;
+
+        if (effectiveJwtSecret != null && !effectiveJwtSecret.isBlank()) {
+            var secretKey = new SecretKeySpec(effectiveJwtSecret.getBytes(StandardCharsets.UTF_8), jwtAlgorithm);
             return NimbusJwtDecoder.withSecretKey(secretKey).build();
         }
 
