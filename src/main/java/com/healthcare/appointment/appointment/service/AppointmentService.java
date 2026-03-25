@@ -47,7 +47,7 @@ public class AppointmentService {
 
     public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request) {
         if (patientId == null || patientId.isBlank()) {
-            throw new BadRequestException("Patient id is required (header X-Patient-Id)");
+            throw new BadRequestException("patientId is required");
         }
         if (request.doctorId() == null || request.doctorId().isBlank()) {
             throw new BadRequestException("doctorId is required");

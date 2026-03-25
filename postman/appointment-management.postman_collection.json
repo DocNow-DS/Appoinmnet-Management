@@ -41,8 +41,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               },
               {
@@ -64,8 +64,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               }
             ],
@@ -78,8 +78,8 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               }
             ],
@@ -92,8 +92,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               }
             ],
@@ -106,8 +106,8 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               },
               {
@@ -129,8 +129,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               }
             ],
@@ -143,8 +143,8 @@
             "method": "DELETE",
             "header": [
               {
-                "key": "X-Patient-Id",
-                "value": "{{patientId}}",
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}",
                 "type": "text"
               }
             ],
@@ -291,6 +291,11 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "description": "Bearer JWT for authenticated patient"
     },
     {
       "key": "patientId",
