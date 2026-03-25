@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.healthcare.appointment.appointment.dto.AppointmentResponse;
 import com.healthcare.appointment.appointment.dto.CreateAppointmentRequest;
 import com.healthcare.appointment.appointment.dto.DoctorActionRequest;
-import com.healthcare.appointment.appointment.dto.DoctorActionRequest.DoctorAppointmentAction;
 import com.healthcare.appointment.appointment.dto.PatientRescheduleRequest;
 import com.healthcare.appointment.appointment.model.Appointment;
 import com.healthcare.appointment.appointment.model.AppointmentStatus;
@@ -180,6 +179,10 @@ public class AppointmentService {
         a.setDoctorMessage(null);
         a.setStatus(AppointmentStatus.ACCEPTED);
         a.setUpdatedAt(LocalDateTime.now());
+        
+        notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+            .block();
+            
         return AppointmentResponse.from(appointmentRepository.save(a));
     }
 
@@ -227,8 +230,8 @@ public class AppointmentService {
                     a.setDoctorMessage(request.message());
                 }
                 
-                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId())
-                    .subscribe();
+                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+                    .block();
             }
             case DECLINE -> {
                 if (a.getStatus() != AppointmentStatus.PENDING

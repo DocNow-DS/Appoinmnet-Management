@@ -26,11 +26,12 @@ public class NotificationServiceClient {
         log.info("NotificationServiceClient initialized with URL: {}", notificationServiceUrl);
     }
 
-    public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId) {
+    public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId, String startTime) {
         AppointmentNotificationRequest request = new AppointmentNotificationRequest(
             patientId, 
             appointmentId, 
-            "APPOINTMENT_APPROVED"
+            "APPOINTMENT_APPROVED",
+            startTime
         );
         
         String url = notificationServiceUrl + "/api/notifications/appointment";
@@ -44,10 +45,6 @@ public class NotificationServiceClient {
                 .bodyToMono(Void.class)
                 .doOnSuccess(success -> log.info("Successfully sent notification for appointment: {}", appointmentId))
                 .doOnError(error -> log.error("Failed to send notification for appointment: {}. Error: {}", 
-                        appointmentId, error.getMessage()))
-                .onErrorResume(error -> {
-                    log.error("Error in notification service call: ", error);
-                    return Mono.empty();
-                });
+                        appointmentId, error.getMessage()));
     }
 }
