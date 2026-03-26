@@ -180,7 +180,7 @@ public class AppointmentService {
         a.setStatus(AppointmentStatus.ACCEPTED);
         a.setUpdatedAt(LocalDateTime.now());
         
-        notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+        notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString(), null)
             .block();
             
         return AppointmentResponse.from(appointmentRepository.save(a));
@@ -207,7 +207,7 @@ public class AppointmentService {
         return AppointmentResponse.from(a);
     }
 
-    public AppointmentResponse doctorAct(String doctorId, String appointmentId, DoctorActionRequest request) {
+    public AppointmentResponse doctorAct(String doctorId, String appointmentId, DoctorActionRequest request, String authorization) {
         requireNonBlank(doctorId, "X-Doctor-Id");
         if (request == null || request.action() == null) {
             throw new BadRequestException("action is required (ACCEPT, DECLINE, REQUEST_RESCHEDULE)");
@@ -230,7 +230,7 @@ public class AppointmentService {
                     a.setDoctorMessage(request.message());
                 }
                 
-                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString())
+                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString(), authorization)
                     .block();
             }
             case DECLINE -> {

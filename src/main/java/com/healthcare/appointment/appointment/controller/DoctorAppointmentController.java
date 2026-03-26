@@ -46,9 +46,10 @@ public class DoctorAppointmentController {
     @PostMapping("/{id}/action")
     public AppointmentResponse action(
             @RequestHeader(X_DOCTOR_ID) String doctorId,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @PathVariable String id,
             @RequestBody DoctorActionRequest request) {
-        return appointmentService.doctorAct(doctorId, id, request);
+        return appointmentService.doctorAct(doctorId, id, request, authorization);
     }
 
     @PatchMapping("/{id}/complete")
