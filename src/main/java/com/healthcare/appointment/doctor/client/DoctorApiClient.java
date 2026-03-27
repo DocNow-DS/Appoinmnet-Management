@@ -44,7 +44,7 @@ public class DoctorApiClient {
     public List<DoctorAvailabilityResponse> getAvailabilityByDoctorId(String doctorId) {
         try {
             DoctorAvailabilityResponse[] response = restTemplate.getForObject(
-                    doctorServiceBaseUrl + "/api/availability/doctor/{doctorId}",
+                    doctorServiceBaseUrl + "/api/availability/user/{userId}",
                     DoctorAvailabilityResponse[].class,
                     doctorId);
             return response == null ? List.of() : Arrays.asList(response);
