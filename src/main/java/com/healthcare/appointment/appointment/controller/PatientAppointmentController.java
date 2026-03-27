@@ -3,6 +3,7 @@ package com.healthcare.appointment.appointment.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,48 +33,54 @@ public class PatientAppointmentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AppointmentResponse create(@RequestBody CreateAppointmentRequest request) {
-        // patientId is now in the request body
-        return appointmentService.createForPatient(request.patientId(), request);
+    public AppointmentResponse create(@RequestBody CreateAppointmentRequest request, Authentication authentication) {
+        String patientId = authentication.getName();
+        return appointmentService.createForPatient(patientId, request);
     }
 
     @GetMapping
-    public List<AppointmentResponse> list(@RequestHeader(X_PATIENT_ID) String patientId) {
+    public List<AppointmentResponse> list(Authentication authentication) {
+        String patientId = authentication.getName();
         return appointmentService.listForPatient(patientId);
     }
 
     @GetMapping("/{id}")
     public AppointmentResponse get(
-            @RequestHeader(X_PATIENT_ID) String patientId,
-            @PathVariable String id) {
+            @PathVariable String id,
+            Authentication authentication) {
+        String patientId = authentication.getName();
         return appointmentService.getForPatient(patientId, id);
     }
 
     @PatchMapping("/{id}/cancel")
     public AppointmentResponse cancel(
-            @RequestHeader(X_PATIENT_ID) String patientId,
-            @PathVariable String id) {
+            @PathVariable String id,
+            Authentication authentication) {
+        String patientId = authentication.getName();
         return appointmentService.cancelForPatient(patientId, id);
     }
 
     @PatchMapping("/{id}/reschedule")
     public AppointmentResponse reschedule(
-            @RequestHeader(X_PATIENT_ID) String patientId,
             @PathVariable String id,
-            @RequestBody PatientRescheduleRequest request) {
+            @RequestBody PatientRescheduleRequest request,
+            Authentication authentication) {
+        String patientId = authentication.getName();
         return appointmentService.rescheduleForPatient(patientId, id, request);
     }
 
     @PostMapping("/{id}/accept-doctor-proposal")
     public AppointmentResponse acceptDoctorProposal(
-            @RequestHeader(X_PATIENT_ID) String patientId,
-            @PathVariable String id) {
+            @PathVariable String id,
+            Authentication authentication) {
+        String patientId = authentication.getName();
         return appointmentService.acceptDoctorProposal(patientId, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@RequestHeader(X_PATIENT_ID) String patientId, @PathVariable String id) {
+    public void delete(@PathVariable String id, Authentication authentication) {
+        String patientId = authentication.getName();
         appointmentService.deleteForPatient(patientId, id);
     }
 }

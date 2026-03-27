@@ -26,7 +26,7 @@ public class NotificationServiceClient {
         log.info("NotificationServiceClient initialized with URL: {}", notificationServiceUrl);
     }
 
-    public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId, String startTime) {
+    public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId, String startTime, String authToken) {
         AppointmentNotificationRequest request = new AppointmentNotificationRequest(
             patientId, 
             appointmentId, 
@@ -38,10 +38,16 @@ public class NotificationServiceClient {
         log.info("Sending appointment approval notification to: {} for patient: {}, appointment: {}", 
                 url, patientId, appointmentId);
         
-        return webClient.post()
+        var webClientRequest = webClient.post()
                 .uri(url)
-                .bodyValue(request)
-                .retrieve()
+                .bodyValue(request);
+        
+        // Add Authorization header if token is provided
+        if (authToken != null && !authToken.isEmpty()) {
+            webClientRequest.header("Authorization", authToken);
+        }
+        
+        return webClientRequest.retrieve()
                 .bodyToMono(Void.class)
                 .doOnSuccess(success -> log.info("Successfully sent notification for appointment: {}", appointmentId))
                 .doOnError(error -> log.error("Failed to send notification for appointment: {}. Error: {}", 
