@@ -50,7 +50,7 @@ public class AppointmentService {
 
     public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request) {
         if (patientId == null || patientId.isBlank()) {
-            throw new BadRequestException("patientId is required");
+            throw new BadRequestException("Patient ID could not be extracted from token");
         }
         if (request.doctorId() == null || request.doctorId().isBlank()) {
             throw new BadRequestException("doctorId is required");
