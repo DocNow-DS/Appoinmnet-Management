@@ -230,8 +230,13 @@ public class AppointmentService {
                     a.setDoctorMessage(request.message());
                 }
                 
-                notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString(), authorization)
-                    .block();
+                try {
+                    notificationServiceClient.sendAppointmentApprovedNotification(a.getPatientId(), a.getId(), a.getStartTime().toString(), authorization)
+                        .block();
+                } catch (Exception e) {
+                    // Log error but don't fail the accept operation if notification fails
+                    System.err.println("Failed to send notification: " + e.getMessage());
+                }
             }
             case DECLINE -> {
                 if (a.getStatus() != AppointmentStatus.PENDING
