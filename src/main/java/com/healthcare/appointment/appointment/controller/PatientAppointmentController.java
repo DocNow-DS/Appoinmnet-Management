@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.healthcare.appointment.appointment.dto.AppointmentResponse;
 import com.healthcare.appointment.appointment.dto.CreateAppointmentRequest;
+import com.healthcare.appointment.appointment.dto.DeleteMessageResponse;
 import com.healthcare.appointment.appointment.dto.PatientRescheduleRequest;
 import com.healthcare.appointment.appointment.service.AppointmentService;
 @RestController
@@ -78,9 +79,9 @@ public class PatientAppointmentController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable String id, Authentication authentication) {
+    public DeleteMessageResponse delete(@PathVariable String id, Authentication authentication) {
         String patientId = authentication.getName();
         appointmentService.deleteForPatient(patientId, id);
+        return DeleteMessageResponse.appointmentDeleted();
     }
 }
