@@ -1,5 +1,6 @@
 package com.healthcare.appointment.shared.web;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -17,21 +18,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> notFound(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", "NOT_FOUND");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, String>> badRequest(BadRequestException ex) {
-        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", "BAD_REQUEST");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.badRequest().body(body);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, String>> conflict(ConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", "CONFLICT");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Map<String, String>> forbidden(ForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", "FORBIDDEN");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 }

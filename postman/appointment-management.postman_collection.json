@@ -33,6 +33,32 @@
       ]
     },
     {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "List doctors for booking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/patient/booking/doctors"
+          }
+        },
+        {
+          "name": "List doctors by specialty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/patient/booking/doctors?specialty=Cardiology",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "patient", "booking", "doctors"],
+              "query": [{ "key": "specialty", "value": "Cardiology" }]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Patient",
       "item": [
         {
