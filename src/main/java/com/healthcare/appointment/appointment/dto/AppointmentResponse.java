@@ -5,22 +5,56 @@ import java.time.LocalDateTime;
 import com.healthcare.appointment.appointment.model.Appointment;
 import com.healthcare.appointment.appointment.model.AppointmentStatus;
 
-public record AppointmentResponse(
-        String id,
-        String patientId,
-        String doctorId,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
-        AppointmentStatus status,
-        String consultationType,
-        String notes,
-        String doctorMessage,
-        LocalDateTime proposedStartTime,
-        LocalDateTime proposedEndTime,
-        int progressPercent,
-        String progressLabel,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt) {
+public final class AppointmentResponse {
+
+    private final String id;
+    private final String patientId;
+    private final String doctorId;
+    private final LocalDateTime startTime;
+    private final LocalDateTime endTime;
+    private final AppointmentStatus status;
+    private final String consultationType;
+    private final String notes;
+    private final String doctorMessage;
+    private final LocalDateTime proposedStartTime;
+    private final LocalDateTime proposedEndTime;
+    private final int progressPercent;
+    private final String progressLabel;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+
+    public AppointmentResponse(
+            String id,
+            String patientId,
+            String doctorId,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            AppointmentStatus status,
+            String consultationType,
+            String notes,
+            String doctorMessage,
+            LocalDateTime proposedStartTime,
+            LocalDateTime proposedEndTime,
+            int progressPercent,
+            String progressLabel,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+        this.id = id;
+        this.patientId = patientId;
+        this.doctorId = doctorId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.consultationType = consultationType;
+        this.notes = notes;
+        this.doctorMessage = doctorMessage;
+        this.proposedStartTime = proposedStartTime;
+        this.proposedEndTime = proposedEndTime;
+        this.progressPercent = progressPercent;
+        this.progressLabel = progressLabel;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     public static AppointmentResponse from(Appointment a) {
         return new AppointmentResponse(
@@ -66,5 +100,65 @@ public record AppointmentResponse(
             case DECLINED -> "Declined by doctor";
             case CANCELLED -> "Cancelled";
         };
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getPatientId() {
+        return patientId;
+    }
+
+    public String getDoctorId() {
+        return doctorId;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public AppointmentStatus getStatus() {
+        return status;
+    }
+
+    public String getConsultationType() {
+        return consultationType;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public String getDoctorMessage() {
+        return doctorMessage;
+    }
+
+    public LocalDateTime getProposedStartTime() {
+        return proposedStartTime;
+    }
+
+    public LocalDateTime getProposedEndTime() {
+        return proposedEndTime;
+    }
+
+    public int getProgressPercent() {
+        return progressPercent;
+    }
+
+    public String getProgressLabel() {
+        return progressLabel;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
