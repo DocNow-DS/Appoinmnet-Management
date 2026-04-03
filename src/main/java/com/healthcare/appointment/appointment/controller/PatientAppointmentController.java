@@ -34,9 +34,9 @@ public class PatientAppointmentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AppointmentResponse create(@RequestBody CreateAppointmentRequest request, Authentication authentication) {
+    public AppointmentResponse create(@RequestBody CreateAppointmentRequest request, Authentication authentication, @RequestHeader(value = "Authorization", required = false) String authorization) {
         String patientId = authentication.getName();
-        return appointmentService.createForPatient(patientId, request);
+        return appointmentService.createForPatient(patientId, request, authorization);
     }
 
     @GetMapping

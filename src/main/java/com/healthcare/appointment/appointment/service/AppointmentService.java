@@ -48,7 +48,7 @@ public class AppointmentService {
         this.defaultDurationMinutes = defaultDurationMinutes;
     }
 
-    public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request) {
+    public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request, String authorization) {
         if (patientId == null || patientId.isBlank()) {
             throw new BadRequestException("Patient ID could not be extracted from token");
         }
@@ -90,7 +90,23 @@ public class AppointmentService {
         a.setCreatedAt(now);
         a.setUpdatedAt(now);
 
-        return AppointmentResponse.from(appointmentRepository.save(a));
+        Appointment saved = appointmentRepository.save(a);
+
+        // Send notification to doctor about new appointment
+        try {
+            notificationServiceClient.sendAppointmentCreatedNotification(
+                patientId,
+                request.doctorId(),
+                saved.getId(),
+                start.toString(),
+                authorization
+            ).block();
+        } catch (Exception e) {
+            // Log error but don't fail the appointment creation if notification fails
+            System.err.println("Failed to send appointment created notification: " + e.getMessage());
+        }
+
+        return AppointmentResponse.from(saved);
     }
 
     public List<AppointmentResponse> listForPatient(String patientId) {
