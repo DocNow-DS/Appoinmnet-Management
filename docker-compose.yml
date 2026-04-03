@@ -1,26 +1,12 @@
 services:
-  mongo:
-    image: mongo:7
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   appointment-management:
     build: .
     ports:
       - "8080:8080"
     environment:
-      MONGODB_URI: mongodb://mongo:27017/appointment_management
-    depends_on:
-      mongo:
-        condition: service_healthy
-
-volumes:
-  mongo_data:
+      SPRING_DATA_MONGODB_URI: mongodb+srv://lasannavodya:DelLCS5EiIBT3jFu@course.uf2pi.mongodb.net/HealthCare?retryWrites=true&w=majority&appName=Course
+      APPOINTMENT_MANAGEMENT_PORT: 8080
+      PATIENT_SERVICE_BASE_URL: http://patient-management:8081
+      DOCTOR_SERVICE_BASE_URL: http://patient-management:8081
+      NOTIFICATION_SERVICE_URL: http://notification-management:8084
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
