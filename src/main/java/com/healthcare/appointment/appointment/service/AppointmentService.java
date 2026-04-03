@@ -48,49 +48,65 @@ public class AppointmentService {
         this.defaultDurationMinutes = defaultDurationMinutes;
     }
 
-    public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request) {
+    public AppointmentResponse createForPatient(String patientId, CreateAppointmentRequest request, String authorization) {
         if (patientId == null || patientId.isBlank()) {
             throw new BadRequestException("Patient ID could not be extracted from token");
         }
-        if (request.doctorId() == null || request.doctorId().isBlank()) {
+        if (request.getDoctorId() == null || request.getDoctorId().isBlank()) {
             throw new BadRequestException("doctorId is required");
         }
-        if (request.startTime() == null) {
+        if (request.getStartTime() == null) {
             throw new BadRequestException("startTime is required");
         }
 
-        LocalDateTime start = request.startTime();
-        int duration = request.durationMinutes() != null && request.durationMinutes() > 0
-                ? request.durationMinutes()
+        LocalDateTime start = request.getStartTime();
+        int duration = request.getDurationMinutes() != null && request.getDurationMinutes() > 0
+                ? request.getDurationMinutes()
                 : defaultDurationMinutes;
         LocalDateTime end = start.plusMinutes(duration);
 
         ensureStartInFuture(start);
-        DoctorProfileResponse doctor = doctorApiClient.getDoctorById(request.doctorId());
+        DoctorProfileResponse doctor = doctorApiClient.getDoctorById(request.getDoctorId());
         if (Boolean.FALSE.equals(doctor.isActive())) {
             throw new BadRequestException("Doctor is not active");
         }
 
-        var availability = doctorApiClient.getAvailabilityByDoctorId(request.doctorId());
+        var availability = doctorApiClient.getAvailabilityByDoctorId(request.getDoctorId());
         availabilityValidator.ensureSlotInAvailability(
-                availability, start, end, request.consultationType());
+                availability, start, end, request.getConsultationType());
 
-        assertNoOverlapForDoctor(request.doctorId(), start, end, null);
+        assertNoOverlapForDoctor(request.getDoctorId(), start, end, null);
         assertNoOverlapForPatient(patientId, start, end, null);
 
         LocalDateTime now = LocalDateTime.now();
         Appointment a = new Appointment();
         a.setPatientId(patientId);
-        a.setDoctorId(request.doctorId());
+        a.setDoctorId(request.getDoctorId());
         a.setStartTime(start);
         a.setEndTime(end);
         a.setStatus(AppointmentStatus.PENDING);
-        a.setConsultationType(request.consultationType());
-        a.setNotes(request.notes());
+        a.setConsultationType(request.getConsultationType());
+        a.setNotes(request.getNotes());
         a.setCreatedAt(now);
         a.setUpdatedAt(now);
 
-        return AppointmentResponse.from(appointmentRepository.save(a));
+        Appointment saved = appointmentRepository.save(a);
+
+        // Send notification to doctor about new appointment
+        try {
+            notificationServiceClient.sendAppointmentCreatedNotification(
+                patientId,
+                request.doctorId(),
+                saved.getId(),
+                start.toString(),
+                authorization
+            ).block();
+        } catch (Exception e) {
+            // Log error but don't fail the appointment creation if notification fails
+            System.err.println("Failed to send appointment created notification: " + e.getMessage());
+        }
+
+        return AppointmentResponse.from(saved);
     }
 
     public List<AppointmentResponse> listForPatient(String patientId) {
@@ -129,12 +145,12 @@ public class AppointmentService {
                 || a.getStatus() == AppointmentStatus.COMPLETED) {
             throw new BadRequestException("Cannot reschedule in status: " + a.getStatus());
         }
-        if (request.startTime() == null) {
+        if (request.getStartTime() == null) {
             throw new BadRequestException("startTime is required");
         }
-        LocalDateTime start = request.startTime();
-        int duration = request.durationMinutes() != null && request.durationMinutes() > 0
-                ? request.durationMinutes()
+        LocalDateTime start = request.getStartTime();
+        int duration = request.getDurationMinutes() != null && request.getDurationMinutes() > 0
+                ? request.getDurationMinutes()
                 : (int) java.time.Duration.between(a.getStartTime(), a.getEndTime()).toMinutes();
         if (duration <= 0) {
             duration = defaultDurationMinutes;
@@ -151,8 +167,8 @@ public class AppointmentService {
 
         a.setStartTime(start);
         a.setEndTime(end);
-        if (request.notes() != null) {
-            a.setNotes(request.notes());
+        if (request.getNotes() != null) {
+            a.setNotes(request.getNotes());
         }
         a.setProposedStartTime(null);
         a.setProposedEndTime(null);
@@ -209,7 +225,7 @@ public class AppointmentService {
 
     public AppointmentResponse doctorAct(String doctorId, String appointmentId, DoctorActionRequest request, String authorization) {
         requireNonBlank(doctorId, "X-Doctor-Id");
-        if (request == null || request.action() == null) {
+        if (request == null || request.getAction() == null) {
             throw new BadRequestException("action is required (ACCEPT, DECLINE, REQUEST_RESCHEDULE)");
         }
 
@@ -217,7 +233,7 @@ public class AppointmentService {
         assertDoctorOwns(a, doctorId);
         LocalDateTime now = LocalDateTime.now();
 
-        switch (request.action()) {
+        switch (request.getAction()) {
             case ACCEPT -> {
                 if (a.getStatus() != AppointmentStatus.PENDING
                         && a.getStatus() != AppointmentStatus.RESCHEDULE_REQUESTED) {
@@ -226,8 +242,8 @@ public class AppointmentService {
                 a.setStatus(AppointmentStatus.ACCEPTED);
                 a.setProposedStartTime(null);
                 a.setProposedEndTime(null);
-                if (request.message() != null) {
-                    a.setDoctorMessage(request.message());
+                if (request.getMessage() != null) {
+                    a.setDoctorMessage(request.getMessage());
                 }
                 
                 try {
@@ -244,27 +260,27 @@ public class AppointmentService {
                     throw new BadRequestException("Cannot decline in status: " + a.getStatus());
                 }
                 a.setStatus(AppointmentStatus.DECLINED);
-                a.setDoctorMessage(request.message());
+                a.setDoctorMessage(request.getMessage());
             }
             case REQUEST_RESCHEDULE -> {
                 if (a.getStatus() != AppointmentStatus.PENDING && a.getStatus() != AppointmentStatus.ACCEPTED) {
                     throw new BadRequestException("Cannot request reschedule in status: " + a.getStatus());
                 }
-                if (request.proposedStartTime() != null && request.proposedEndTime() != null) {
-                    if (!request.proposedEndTime().isAfter(request.proposedStartTime())) {
+                if (request.getProposedStartTime() != null && request.getProposedEndTime() != null) {
+                    if (!request.getProposedEndTime().isAfter(request.getProposedStartTime())) {
                         throw new BadRequestException("proposedEndTime must be after proposedStartTime");
                     }
                     var availability = doctorApiClient.getAvailabilityByDoctorId(a.getDoctorId());
                     availabilityValidator.ensureSlotInAvailability(
                             availability,
-                            request.proposedStartTime(),
-                            request.proposedEndTime(),
+                            request.getProposedStartTime(),
+                            request.getProposedEndTime(),
                             a.getConsultationType());
                 }
                 a.setStatus(AppointmentStatus.RESCHEDULE_REQUESTED);
-                a.setDoctorMessage(request.message());
-                a.setProposedStartTime(request.proposedStartTime());
-                a.setProposedEndTime(request.proposedEndTime());
+                a.setDoctorMessage(request.getMessage());
+                a.setProposedStartTime(request.getProposedStartTime());
+                a.setProposedEndTime(request.getProposedEndTime());
             }
         }
 

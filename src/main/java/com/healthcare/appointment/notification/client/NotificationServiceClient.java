@@ -29,6 +29,7 @@ public class NotificationServiceClient {
     public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId, String startTime, String authToken) {
         AppointmentNotificationRequest request = new AppointmentNotificationRequest(
             patientId, 
+            null,
             appointmentId, 
             "APPOINTMENT_APPROVED",
             startTime
@@ -51,6 +52,35 @@ public class NotificationServiceClient {
                 .bodyToMono(Void.class)
                 .doOnSuccess(success -> log.info("Successfully sent notification for appointment: {}", appointmentId))
                 .doOnError(error -> log.error("Failed to send notification for appointment: {}. Error: {}", 
+                        appointmentId, error.getMessage()));
+    }
+
+    public Mono<Void> sendAppointmentCreatedNotification(String patientId, String doctorId, String appointmentId, String startTime, String authToken) {
+        AppointmentNotificationRequest request = new AppointmentNotificationRequest(
+            patientId, 
+            doctorId,
+            appointmentId, 
+            "APPOINTMENT_CREATED",
+            startTime
+        );
+        
+        String url = notificationServiceUrl + "/api/notifications/appointment";
+        log.info("Sending appointment created notification to: {} for patient: {}, doctor: {}, appointment: {}", 
+                url, patientId, doctorId, appointmentId);
+        
+        var webClientRequest = webClient.post()
+                .uri(url)
+                .bodyValue(request);
+        
+        // Add Authorization header if token is provided
+        if (authToken != null && !authToken.isEmpty()) {
+            webClientRequest.header("Authorization", authToken);
+        }
+        
+        return webClientRequest.retrieve()
+                .bodyToMono(Void.class)
+                .doOnSuccess(success -> log.info("Successfully sent appointment created notification for appointment: {}", appointmentId))
+                .doOnError(error -> log.error("Failed to send appointment created notification for appointment: {}. Error: {}", 
                         appointmentId, error.getMessage()));
     }
 }
