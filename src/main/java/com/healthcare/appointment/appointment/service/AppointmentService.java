@@ -96,7 +96,7 @@ public class AppointmentService {
         try {
             notificationServiceClient.sendAppointmentCreatedNotification(
                 patientId,
-                request.doctorId(),
+                request.getDoctorId(),
                 saved.getId(),
                 start.toString(),
                 authorization
