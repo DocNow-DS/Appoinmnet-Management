@@ -49,4 +49,8 @@ public class CreateAppointmentRequest {
     public void setNotes(String notes) {
         this.notes = notes;
     }
+
+    public String doctorId() {
+        return doctorId;
+    }
 }
