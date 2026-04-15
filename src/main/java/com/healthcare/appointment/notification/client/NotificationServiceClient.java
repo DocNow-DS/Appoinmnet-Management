@@ -6,9 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.healthcare.appointment.notification.dto.AppointmentNotificationRequest;
-
 import reactor.core.publisher.Mono;
+import java.util.Map;
 
 @Component
 public class NotificationServiceClient {
@@ -27,13 +26,12 @@ public class NotificationServiceClient {
     }
 
     public Mono<Void> sendAppointmentApprovedNotification(String patientId, String appointmentId, String startTime, String authToken) {
-        AppointmentNotificationRequest request = new AppointmentNotificationRequest(
-            patientId, 
-            null,
-            appointmentId, 
-            "APPOINTMENT_APPROVED",
-            startTime
-        );
+        Map<String, String> request = Map.of(
+                "patientId", patientId,
+                "doctorId", "",
+                "appointmentId", appointmentId,
+                "notificationType", "APPOINTMENT_APPROVED",
+                "startTime", startTime);
         
         String url = notificationServiceUrl + "/api/notifications/appointment";
         log.info("Sending appointment approval notification to: {} for patient: {}, appointment: {}", 
@@ -56,13 +54,12 @@ public class NotificationServiceClient {
     }
 
     public Mono<Void> sendAppointmentCreatedNotification(String patientId, String doctorId, String appointmentId, String startTime, String authToken) {
-        AppointmentNotificationRequest request = new AppointmentNotificationRequest(
-            patientId, 
-            doctorId,
-            appointmentId, 
-            "APPOINTMENT_CREATED",
-            startTime
-        );
+        Map<String, String> request = Map.of(
+                "patientId", patientId,
+                "doctorId", doctorId == null ? "" : doctorId,
+                "appointmentId", appointmentId,
+                "notificationType", "APPOINTMENT_CREATED",
+                "startTime", startTime);
         
         String url = notificationServiceUrl + "/api/notifications/appointment";
         log.info("Sending appointment created notification to: {} for patient: {}, doctor: {}, appointment: {}", 

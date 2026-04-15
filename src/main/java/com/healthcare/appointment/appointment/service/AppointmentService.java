@@ -52,6 +52,9 @@ public class AppointmentService {
         if (patientId == null || patientId.isBlank()) {
             throw new BadRequestException("Patient ID could not be extracted from token");
         }
+        if (request == null) {
+            throw new BadRequestException("Request body is required");
+        }
         if (request.getDoctorId() == null || request.getDoctorId().isBlank()) {
             throw new BadRequestException("doctorId is required");
         }
@@ -67,6 +70,9 @@ public class AppointmentService {
 
         ensureStartInFuture(start);
         DoctorProfileResponse doctor = doctorApiClient.getDoctorById(request.getDoctorId());
+        if (doctor == null) {
+            throw new NotFoundException("Doctor not found: " + request.getDoctorId());
+        }
         if (Boolean.FALSE.equals(doctor.isActive())) {
             throw new BadRequestException("Doctor is not active");
         }

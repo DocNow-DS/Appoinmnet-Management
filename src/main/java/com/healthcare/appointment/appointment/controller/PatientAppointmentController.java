@@ -20,6 +20,7 @@ import com.healthcare.appointment.appointment.dto.CreateAppointmentRequest;
 import com.healthcare.appointment.appointment.dto.DeleteMessageResponse;
 import com.healthcare.appointment.appointment.dto.PatientRescheduleRequest;
 import com.healthcare.appointment.appointment.service.AppointmentService;
+import com.healthcare.appointment.shared.exception.ForbiddenException;
 @RestController
 @RequestMapping("/api/patient/appointments")
 public class PatientAppointmentController {
@@ -35,13 +36,13 @@ public class PatientAppointmentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AppointmentResponse create(@RequestBody CreateAppointmentRequest request, Authentication authentication, @RequestHeader(value = "Authorization", required = false) String authorization) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.createForPatient(patientId, request, authorization);
     }
 
     @GetMapping
     public List<AppointmentResponse> list(Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.listForPatient(patientId);
     }
 
@@ -49,7 +50,7 @@ public class PatientAppointmentController {
     public AppointmentResponse get(
             @PathVariable String id,
             Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.getForPatient(patientId, id);
     }
 
@@ -57,7 +58,7 @@ public class PatientAppointmentController {
     public AppointmentResponse cancel(
             @PathVariable String id,
             Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.cancelForPatient(patientId, id);
     }
 
@@ -66,7 +67,7 @@ public class PatientAppointmentController {
             @PathVariable String id,
             @RequestBody PatientRescheduleRequest request,
             Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.rescheduleForPatient(patientId, id, request);
     }
 
@@ -74,14 +75,21 @@ public class PatientAppointmentController {
     public AppointmentResponse acceptDoctorProposal(
             @PathVariable String id,
             Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         return appointmentService.acceptDoctorProposal(patientId, id);
     }
 
     @DeleteMapping("/{id}")
     public DeleteMessageResponse delete(@PathVariable String id, Authentication authentication) {
-        String patientId = authentication.getName();
+        String patientId = extractPatientId(authentication);
         appointmentService.deleteForPatient(patientId, id);
         return DeleteMessageResponse.appointmentDeleted();
+    }
+
+    private static String extractPatientId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new ForbiddenException("Authentication required");
+        }
+        return authentication.getName();
     }
 }
